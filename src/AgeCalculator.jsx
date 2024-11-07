@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useAxiosPublic from "./Hooks/useAxiosPublic";
-
+import toast, { Toaster } from "react-hot-toast";
 const AgeCalculator = () => {
   const [birthDateInput, setBirthDateInput] = useState("");
   const [calculatedAge, setCalculatedAge] = useState(null);
@@ -48,7 +48,7 @@ const AgeCalculator = () => {
     const name = e.target.name.value;
 
     if (!calculatedAge) {
-      alert("Please calculate your age first!");
+      toast.error("Please calculate your age first!");
       return;
     }
 
@@ -62,7 +62,12 @@ const AgeCalculator = () => {
       const res = await axiosPublic.post("/postUserAge", userData);
 
       if (res.data.insertedId) {
-        alert("Wow");
+        toast.success(` Calculated ${name} age! Successfully`, {
+          duration: 4000,
+        });
+        // Reset form fields and states after successful submission
+        e.target.reset(); // Reset the form fields
+        setBirthDateInput(""); // Clear the birth date input field
       }
     } catch (error) {
       console.log(error);
@@ -134,6 +139,7 @@ const AgeCalculator = () => {
           )}
         </div>
       </div>
+      <Toaster position="top-center" reverseOrder={true} />
     </div>
   );
 };

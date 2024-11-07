@@ -1,9 +1,10 @@
 import { useState } from "react";
+import useAxiosPublic from "./Hooks/useAxiosPublic";
 
 const AgeCalculator = () => {
   const [birthDateInput, setBirthDateInput] = useState("");
   const [calculatedAge, setCalculatedAge] = useState(null);
-
+  const axiosPublic = useAxiosPublic();
   // Calculate today's date for max attribute
   const today = new Date();
   const formattedTodayDate = today.toISOString().split("T")[0]; // YYYY-MM-DD format
@@ -42,43 +43,86 @@ const AgeCalculator = () => {
     });
   };
 
+  const handleSubmitAge = async (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+
+    if (!calculatedAge) {
+      alert("Please calculate your age first!");
+      return;
+    }
+
+    // Destructure calculatedAge to get individual values
+    const { years, months, days } = calculatedAge;
+
+    const userData = { name, years, months, days };
+    console.log("User Data:", userData);
+
+    try {
+      const res = await axiosPublic.post("/postUserAge", userData);
+
+      if (res.data.insertedId) {
+        alert("Wow");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div>
       <div className="hero bg-base-200 text-white min-h-screen">
         <div className="hero-content flex-col   w-full">
           <div className="text-center lg:text-left">
-            <h1 className="text-3xl text-white font-bold font-serif">Age Calculator!</h1>
+            <h1 className="text-3xl text-white font-bold font-serif">
+              Age Calculator!
+            </h1>
           </div>
           <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-            <div className="form-control card-body ">
-              <label className="label">
-                <span className="label-tex text-lg">
-                  Please select your date of birth
-                </span>
-              </label>
-              <input
-                value={birthDateInput}
-                onChange={(e) => {
-                  if (e.target.value.length <= 10) {
-                    setBirthDateInput(e.target.value);
-                  }
-                }}
-                type="date"
-                min="0000-01-01"
-                max={formattedTodayDate} // Disable future dates
-                className="input input-bordered "
-                required
-              />
-              <div className="flex flex-col space-y-8 py-5">
-                <button
-                  onClick={calculateAge}
-                  disabled={!birthDateInput}
-                  className="btn btn-primary"
-                >
-                  Calculate Age
-                </button>
+            <form onSubmit={handleSubmitAge}>
+              <div className="form-control card-body ">
+                <label className="label">
+                  <span className="label-tex text-lg">Name</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Your Name"
+                  className="input input-bordered "
+                  required
+                />
               </div>
-            </div>
+              <div className="form-control card-body ">
+                <label className="label">
+                  <span className="label-tex text-lg">
+                    Please select your date of birth
+                  </span>
+                </label>
+                <input
+                  name="age"
+                  value={birthDateInput}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 10) {
+                      setBirthDateInput(e.target.value);
+                    }
+                  }}
+                  type="date"
+                  min="0000-01-01"
+                  max={formattedTodayDate} // Disable future dates
+                  className="input input-bordered "
+                  required
+                />
+                <div className="flex flex-col space-y-8 py-5">
+                  <button
+                    onClick={calculateAge}
+                    type="submit"
+                    disabled={!birthDateInput}
+                    className="btn btn-primary"
+                  >
+                    Calculate Age
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
           {calculatedAge && (
             <div>
